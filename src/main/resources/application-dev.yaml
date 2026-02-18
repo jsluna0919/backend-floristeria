@@ -1,0 +1,29 @@
+server:
+  port: 8080
+  servlet:
+    context-path: "/api/v1"
+
+spring:
+  application:
+    name: "floristeria-api"
+  devtools:
+    add-properties: false
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/floristeria_dev"
+    username: "postgres"
+    password: "Santiago0919"
+    driverClassName: "org.postgresql.Driver"
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate.jdbc.lob.non_contextual_creation: true
+    open-in-view: false
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+cors:
+  allowed-origins: "http://localhost:4200,https://floristeria-pedidos.netlify.app"
