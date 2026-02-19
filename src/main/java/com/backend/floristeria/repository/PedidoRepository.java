@@ -21,17 +21,17 @@ public interface PedidoRepository extends JpaRepository<PedidoEntity, Long> {
     // -------------------------------------------------------
     // Busca pedidos por estado (ej: PENDIENTE, EN_PRODUCCION)
     // Pageable permite enviar ?page=0&size=10 desde el frontend
-    Page<PedidoEntity> findByEstado(EstadoPedido estado, Pageable pageable);
+    Page<PedidoEntity> findByEstadoPedido(EstadoPedido estado, Pageable pageable);
 
     // Búsqueda flexible (varios estados a la vez)
     // Útil para ver "PENDIENTE" y "EN_PRODUCCION" en una sola lista
-    Page<PedidoEntity> findByEstadoIn(List<EstadoPedido> estados, Pageable pageable);
+    Page<PedidoEntity> findByEstadoPedidoIn(List<EstadoPedido> estados, Pageable pageable);
 
     // -------------------------------------------------------
     // PARA EL ROL DE "REPARTIDOR"
     // -------------------------------------------------------
     // Ver solo los pedidos asignados a mí que no han sido entregados
-    List<PedidoEntity> findByRepartidorAndEstadoNot(UsuarioEntity repartidor, EstadoPedido estado);
+    List<PedidoEntity> findByRepartidorAndEstadoPedidoNot(UsuarioEntity repartidor, EstadoPedido estado);
 
     // -------------------------------------------------------
     // PARA REPORTES (ADMIN / AUXILIAR)

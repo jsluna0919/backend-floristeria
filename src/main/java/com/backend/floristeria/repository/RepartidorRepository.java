@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface RepartidorRepository extends JpaRepository<RepartidorEntity, Long> {
 
-    Optional<RepartidorEntity> findByNombreAndTelefono(String nombre, String telefono);
+    Optional<RepartidorEntity> findByNombreAndCelular(String nombre, String celular);
 }

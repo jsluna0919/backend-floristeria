@@ -87,7 +87,7 @@ public class PedidoService {
                 .formaPago(nuevoPedido.getFormaPago())
                 .estadoPago(nuevoPedido.getEstadoPago())
                 //Estado pedido por defecto al crear es pendiente
-                .estado(EstadoPedido.PENDIENTE)
+                .estadoPedido(EstadoPedido.PENDIENTE)
                 //Fecha creacion
                 .fechaCreacion(LocalDateTime.now())
                 .build();
@@ -100,9 +100,9 @@ public class PedidoService {
         var pedido = pedidoRepository.findById(idPedido)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
 
-        validarTansicion(pedido.getEstado(), nuevoEstado);
+        validarTansicion(pedido.getEstadoPedido(), nuevoEstado);
         validarPermisosPorRol(usuario.getRolUsuario(), nuevoEstado);
-        pedido.setEstado(nuevoEstado);
+        pedido.setEstadoPedido(nuevoEstado);
         return pedidoRepository.save(pedido);
     }
 

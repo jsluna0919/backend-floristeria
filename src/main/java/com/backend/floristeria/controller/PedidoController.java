@@ -34,6 +34,6 @@ public class PedidoController {
     public ResponseEntity<Page<PedidoEntity>> listarPedidos(Pageable pageable,
                                                             Authentication authentication) {
         String username = authentication.getClass().getName();
-        var usuario =
+        return null;
     }
 }
