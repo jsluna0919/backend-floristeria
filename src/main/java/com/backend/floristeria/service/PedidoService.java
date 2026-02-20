@@ -13,7 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -31,6 +33,8 @@ public class PedidoService {
     private UsuarioRepository usuarioRepository;
     @Autowired
     private RepartidorRepository repartidorRepository;
+    @Autowired
+    CloudinaryService cloudinaryService;
 
     public PedidoEntity crearPedido(PedidoEntity nuevoPedido, String userName){
 
@@ -194,7 +198,22 @@ public class PedidoService {
         return pedidoRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
     }
 
+    public void asignarImagen(Long id, MultipartFile imagen, String donde) throws IOException {
+        var pedido =  pedidoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+        String url = cloudinaryService.subirImagen(imagen);
+        if("referencia".equalsIgnoreCase(donde)){
+            pedido.setImagen(url);
+        }
+        else if ("realizado".equalsIgnoreCase(donde)){
+            pedido.setImgArregloRealizado(url);
+            pedido.setFechaModificacion(LocalDateTime.now());
+        }else {
+            throw new IllegalArgumentException("Ubicacion no valida "+ donde);
+        }
+        pedidoRepository.save(pedido);
 
+    }
 
     private void validarPermisosPorRol(RolUsuario rol, EstadoPedido nuevoEstado){
         switch (rol){

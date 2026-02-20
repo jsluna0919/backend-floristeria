@@ -10,11 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/pedidos")
 @CrossOrigin(origins = "http://localhost:4200") // Permite conexión desde Angular en local
-public class PedidoController {
+public class PedidoController{
 
     @Autowired
     private PedidoService pedidoService;
@@ -29,6 +32,15 @@ public class PedidoController {
         var pedidoNuevo = PedidoMapper.toEntity(dto);
         var pedidoGuardado = pedidoService.crearPedido(pedidoNuevo, username);
         return ResponseEntity.ok(PedidoMapper.toDTO(pedidoGuardado));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'AUXILIAR','VENDEDOR')")
+    @PatchMapping("/{id}/subir-imagen/{donde}")
+    public ResponseEntity<?> subirImagen(@PathVariable Long id,
+                                         @RequestParam MultipartFile imagen,
+                                         @PathVariable String donde) throws IOException {
+        pedidoService.asignarImagen(id, imagen, donde);
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'AUXILIAR','VENDEDOR','DECORADOR')")

@@ -28,7 +28,10 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
+	//Para encriptar contrasenias
 	implementation("org.springframework.boot:spring-boot-starter-security")
+	// SDK principal de Cloudinary (Manejo imagenes)
+	implementation("com.cloudinary:cloudinary-http5:2.0.0")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("org.postgresql:postgresql")
