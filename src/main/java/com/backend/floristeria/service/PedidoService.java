@@ -8,6 +8,7 @@ import com.backend.floristeria.model.pedido.PedidoEntity;
 import com.backend.floristeria.model.repartidor.RepartidorEntity;
 import com.backend.floristeria.model.usuario.RolUsuario;
 import com.backend.floristeria.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,20 +22,15 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class PedidoService {
 
-    @Autowired
-    private ClienteRepository clienteRepository;
-    @Autowired
-    private PedidoRepository pedidoRepository;
-    @Autowired
-    private DestinatarioRepository destinatarioRepository;
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-    @Autowired
-    private RepartidorRepository repartidorRepository;
-    @Autowired
-    CloudinaryService cloudinaryService;
+    private final ClienteRepository clienteRepository;
+    private final PedidoRepository pedidoRepository;
+    private final DestinatarioRepository destinatarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final RepartidorRepository repartidorRepository;
+    private final CloudinaryService cloudinaryService;
 
     public PedidoEntity crearPedido(PedidoEntity nuevoPedido, String userName){
 
