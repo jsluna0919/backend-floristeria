@@ -18,7 +18,7 @@ public class DataInitializer {
                 UsuarioEntity admin = new UsuarioEntity();
                 admin.setNombre("Administrador");
                 admin.setUsername("admin");
-                admin.setPassword(passwordEncoder.encode("admin1233"));
+                admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.setRolUsuario(RolUsuario.ADMINISTRADOR);
                 usuarioRepository.save(admin);
                 System.out.println("Administrador creado"+ admin);
