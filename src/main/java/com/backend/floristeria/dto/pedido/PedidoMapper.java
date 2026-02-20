@@ -15,7 +15,7 @@ public class PedidoMapper {
                 .cliente(ClienteMapper.toDTO(entity.getCliente()))
                 .destinatario(DestinatarioMapper.toDTO(entity.getDestinatario()))
                 .repartidor(RepartidorMapper.toDTO(entity.getRepartidor()))
-                .usuario(UsuarioMapper.toDto(entity.getUsuario()))
+                .usuario(UsuarioMapper.toDtoResumen(entity.getUsuario()))
                 //Arreglo floral
                 .motivoArreglo(entity.getMotivoArreglo())
                 .arregloFloral(entity.getArregloFloral())
@@ -70,6 +70,8 @@ public class PedidoMapper {
                 // Info pago
                 .formaPago(dto.getFormaPago())
                 .estadoPago(dto.getEstadoPago())
+                // Estado pedido
+                .estadoPedido(dto.getEstadoPedido())
                 .build();
     }// Guardar pedido
 }

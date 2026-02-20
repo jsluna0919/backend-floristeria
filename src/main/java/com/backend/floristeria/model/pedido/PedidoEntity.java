@@ -39,7 +39,7 @@ public class PedidoEntity {
 
     //Repartidor
     @ManyToOne
-    @JoinColumn(name = "repartidor_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "repartidor_id", referencedColumnName = "id", nullable = true)
     private RepartidorEntity repartidor;
 
     //Usuario

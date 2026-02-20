@@ -45,4 +45,7 @@ public interface PedidoRepository extends JpaRepository<PedidoEntity, Long> {
                                           @Param("inicio") LocalDateTime inicio,
                                           @Param("fin") LocalDateTime fin);
 
+    Page<PedidoEntity> findAll(Pageable pageable);
+
+    //TODO: revisar que me puede servir y tener pendientes los reportes.
 }

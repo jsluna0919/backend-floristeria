@@ -19,6 +19,17 @@ public class UsuarioMapper {
                 .build();
     }
 
+    public static UsuarioDTO toDtoResumen(UsuarioEntity entity){
+        if(entity == null)return null;
+        return UsuarioDTO.builder()
+                .id(entity.getId())
+                .nombre(entity.getNombre())
+                .username(entity.getUsername())
+                .password("*****")
+                .rolUsuario(entity.getRolUsuario())
+                .build();
+    }
+
     public static UsuarioEntity toEntity(UsuarioDTO dto){
         if(dto == null)return null;
         return UsuarioEntity.builder()

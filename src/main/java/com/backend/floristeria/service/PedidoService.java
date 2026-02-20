@@ -1,17 +1,21 @@
 package com.backend.floristeria.service;
 
+import com.backend.floristeria.dto.pedido.PedidoDTO;
 import com.backend.floristeria.model.cliente.ClienteEntity;
 import com.backend.floristeria.model.destinatario.DestinatarioEntity;
 import com.backend.floristeria.model.pedido.EstadoPedido;
 import com.backend.floristeria.model.pedido.PedidoEntity;
+import com.backend.floristeria.model.repartidor.RepartidorEntity;
 import com.backend.floristeria.model.usuario.RolUsuario;
-import com.backend.floristeria.model.usuario.UsuarioEntity;
 import com.backend.floristeria.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -28,9 +32,9 @@ public class PedidoService {
     @Autowired
     private RepartidorRepository repartidorRepository;
 
-    public PedidoEntity crearPedido(PedidoEntity nuevoPedido, String usernameVendedor){
+    public PedidoEntity crearPedido(PedidoEntity nuevoPedido, String userName){
 
-        var usuario = usuarioRepository.findByUsername(usernameVendedor)
+        var usuario = usuarioRepository.findByUsername(userName)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         var cliente = clienteRepository.findByTipoDocumentoAndNumeroDocumento(nuevoPedido.getCliente().getTipoDocumento(),
@@ -95,27 +99,111 @@ public class PedidoService {
         return pedidoRepository.save(pedido);
     }
 
-    public PedidoEntity cambiarEstadoPedido(Long idPedido, EstadoPedido nuevoEstado, UsuarioEntity usuario){
+    public PedidoEntity modificarPedido(Long idPedido, PedidoEntity pedido, String userName){
 
-        var pedido = pedidoRepository.findById(idPedido)
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+        var usuario = usuarioRepository.findByUsername(userName);
+        var pedidoExistente = pedidoRepository.findById(idPedido)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id" + idPedido));
+        validarPermisosPorRol(usuario.get().getRolUsuario(), pedido.getEstadoPedido());
+        validarTansicion(pedidoExistente.getEstadoPedido(), pedido.getEstadoPedido(), usuario.get().getRolUsuario());
 
-        validarTansicion(pedido.getEstadoPedido(), nuevoEstado);
-        validarPermisosPorRol(usuario.getRolUsuario(), nuevoEstado);
-        pedido.setEstadoPedido(nuevoEstado);
-        return pedidoRepository.save(pedido);
+        //Arreglo Floral
+        Optional.ofNullable(pedido.getMotivoArreglo()).ifPresent(pedidoExistente::setMotivoArreglo);
+        Optional.ofNullable(pedido.getDescripcion()).ifPresent(pedidoExistente::setDescripcion);
+        Optional.ofNullable(pedido.getAnexos()).ifPresent(pedidoExistente::setAnexos);
+        Optional.ofNullable(pedido.getValorArreglo()).ifPresent(pedidoExistente::setValorArreglo);
+        Optional.ofNullable(pedido.getImagen()).ifPresent(pedidoExistente::setImagen);
+        Optional.ofNullable(pedido.getMensaje()).ifPresent(pedidoExistente::setMensaje);
+        //Info Envio
+        Optional.ofNullable(pedido.getCiudadEnvio()).ifPresent(pedidoExistente::setCiudadEnvio);
+        Optional.ofNullable(pedido.getDireccionEnvio()).ifPresent(pedidoExistente::setDireccionEnvio);
+        Optional.ofNullable(pedido.getSector()).ifPresent(pedidoExistente::setSector);
+        Optional.ofNullable(pedido.getObservaciones()).ifPresent(pedidoExistente::setObservaciones);
+        Optional.ofNullable(pedido.getValorEnvio()).ifPresent(pedidoExistente::setValorEnvio);
+        Optional.ofNullable(pedido.getFechaEntrega()).ifPresent(pedidoExistente::setFechaEntrega);
+        //Valor total
+        if(pedido.getValorArreglo()!=null && pedido.getValorEnvio()!=null){
+            pedidoExistente.setTotal(pedido.getValorArreglo().add(pedido.getValorEnvio()));
+        }else if (pedido.getValorArreglo()!=null && pedido.getValorEnvio() ==null){
+            pedidoExistente.setTotal(pedido.getValorArreglo().add(pedidoExistente.getValorEnvio()));
+        }else if (pedido.getValorArreglo() == null && pedido.getValorEnvio() !=null){
+            pedidoExistente.setTotal(pedidoExistente.getValorArreglo().add(pedido.getValorEnvio()));
+        }
+        //Info pago
+        Optional.ofNullable(pedido.getFormaPago()).ifPresent(pedidoExistente::setFormaPago);
+        Optional.ofNullable(pedido.getEstadoPago()).ifPresent(pedidoExistente::setEstadoPago);
+        //Estado pedido
+        Optional.ofNullable(pedido.getEstadoPedido()).ifPresent(pedidoExistente::setEstadoPedido);
+        //Imagen arreglo realizado
+        Optional.ofNullable(pedido.getImgArregloRealizado()).ifPresent(pedidoExistente::setImgArregloRealizado);
+        //Modificar cliente
+        if(pedido.getCliente() != null){
+            var clienteExistente = pedidoExistente.getCliente();
+            var clienteModificado = pedido.getCliente();
+
+            if(clienteModificado.getTipoDocumento() != null) clienteExistente.setTipoDocumento(clienteModificado.getTipoDocumento());
+            if(clienteModificado.getNumeroDocumento() != null) clienteExistente.setNumeroDocumento(clienteModificado.getNumeroDocumento());
+            if(clienteModificado.getNombre() != null) clienteExistente.setNombre(clienteModificado.getNombre());
+            if(clienteModificado.getApellido() != null) clienteExistente.setApellido(clienteModificado.getApellido());
+            if(clienteModificado.getTelefono() != null) clienteExistente.setTelefono(clienteModificado.getTelefono());
+            if(clienteModificado.getEmail() != null) clienteExistente.setEmail(clienteModificado.getEmail());
+            if(clienteModificado.getCiudad() != null) clienteExistente.setCiudad(clienteModificado.getCiudad());
+            if(clienteModificado.getDireccion() != null) clienteExistente.setDireccion(clienteModificado.getDireccion());
+            clienteExistente.setFechaModificacion(LocalDateTime.now());
+            pedidoExistente.setCliente(clienteExistente);
+            clienteRepository.save(clienteExistente);
+        }
+        //Modificar destinatario
+        if(pedido.getDestinatario() != null){
+            var destinatarioExistente = pedidoExistente.getDestinatario();
+            var destinatarioModificado = pedido.getDestinatario();
+
+            if(destinatarioModificado.getNombre() != null) destinatarioExistente.setNombre(destinatarioModificado.getNombre());
+            if(destinatarioModificado.getTelefono() != null) destinatarioExistente.setTelefono(destinatarioModificado.getTelefono());
+            destinatarioExistente.setFechaModificacion(LocalDateTime.now());
+            pedidoExistente.setDestinatario(destinatarioExistente);
+            destinatarioRepository.save(destinatarioExistente);
+        }
+        //Modificar repartidor
+        if(pedido.getRepartidor() != null){
+            var repartidorExistente = repartidorRepository
+                    .findByNombreAndCelular(pedido.getRepartidor().getNombre(), pedido.getRepartidor().getCelular())
+                    .orElseGet(() -> repartidorRepository.save(
+                            RepartidorEntity.builder()
+                                    .nombre(pedido.getRepartidor().getNombre())
+                                    .celular(pedido.getRepartidor().getCelular())
+                                    .build()
+                    ));
+            var repartidorModificado = pedido.getRepartidor();
+            if(repartidorModificado.getNombre() != null) repartidorExistente.setNombre(repartidorModificado.getNombre());
+            if(repartidorModificado.getCelular() != null) repartidorExistente.setCelular(repartidorModificado.getCelular());
+            pedidoExistente.setRepartidor(repartidorExistente);
+            pedidoRepository.save(pedidoExistente);
+        }
+        //Modificar fecha de cambios
+        pedidoExistente.setFechaModificacion(LocalDateTime.now());
+        var guardado = pedidoRepository.save(pedidoExistente);
+        return guardado;
+    }
+
+    public Page<PedidoEntity> obtenerPedidos(Pageable pageable, String userName) {
+        return pedidoRepository.findAll(pageable);
+    }
+
+    public PedidoEntity obtenerPedidoPorId(Long id) {
+        return pedidoRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
     }
 
 
 
     private void validarPermisosPorRol(RolUsuario rol, EstadoPedido nuevoEstado){
         switch (rol){
-            case PRODUCCION:
+            case DECORADOR:
                 if(nuevoEstado != EstadoPedido.ELABORADO){
                     throw new SecurityException("El decorador solo puede cambiar a 'ELABORADO'");
                 }
                 break;
-            case ENVIOS:
+            case REPARTIDOR:
                 if(nuevoEstado != EstadoPedido.ENTREGADO){
                     throw new SecurityException("El repartidor solo puede cambiar a 'ENTREGADO'");
                 }
@@ -123,14 +211,14 @@ public class PedidoService {
         }
     }
 
-    private void validarTansicion(EstadoPedido actual, EstadoPedido nuevo){
+    private void validarTansicion(EstadoPedido actual, EstadoPedido nuevo, RolUsuario rol){
 
-        if (actual == EstadoPedido.ENTREGADO) {
+        if (actual == EstadoPedido.ENTREGADO && rol != RolUsuario.ADMINISTRADOR && rol != RolUsuario.AUXILIAR) {
             throw new IllegalStateException("El pedido ya fue entregado y no se puede modificar");
         }
 
         if (actual == EstadoPedido.PENDIENTE && nuevo == EstadoPedido.ENTREGADO) {
-            throw new IllegalStateException("Un pedido pendiente no se puede entregar sin pasara por produccion");
+            throw new IllegalStateException("Un pedido pendiente no se puede entregar sin pasar por produccion");
         }
     }
 

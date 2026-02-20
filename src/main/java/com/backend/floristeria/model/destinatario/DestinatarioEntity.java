@@ -15,7 +15,7 @@ import java.util.List;
 
 @Entity
 @Data
-@Table
+@Table(name = "destinatarios")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
