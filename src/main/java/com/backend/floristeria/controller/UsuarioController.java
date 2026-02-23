@@ -5,7 +5,10 @@ import com.backend.floristeria.dto.usuario.UsuarioMapper;
 import com.backend.floristeria.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -44,5 +47,12 @@ public class UsuarioController {
     public ResponseEntity<?> eliminarUsuario(@PathVariable String username) {
         usuarioService.eliminarUsuario(username);
         return ResponseEntity.ok("Usuario eliminado");
+    }
+
+    @GetMapping("/auth/me")
+    public ResponseEntity<?> loginUsuario(Authentication authentication) {
+        return ResponseEntity.ok(
+                Map.of("username", authentication.getName(), "authorities", authentication.getAuthorities())
+        );
     }
 }
