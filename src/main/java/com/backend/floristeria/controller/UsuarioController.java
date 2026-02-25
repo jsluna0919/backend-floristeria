@@ -51,8 +51,8 @@ public class UsuarioController {
 
     @GetMapping("/auth/me")
     public ResponseEntity<?> loginUsuario(Authentication authentication) {
-        return ResponseEntity.ok(
-                Map.of("username", authentication.getName(), "authorities", authentication.getAuthorities())
-        );
+        var usuario = usuarioService.getUsuario(authentication.getName()).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        var dto = UsuarioMapper.toDtoResumen(usuario);
+        return ResponseEntity.ok(dto);
     }
 }

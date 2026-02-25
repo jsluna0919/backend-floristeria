@@ -44,6 +44,13 @@ public class UsuarioService {
         return usuarios;
     }
 
+    public Optional<UsuarioEntity> getUsuario(String username) {
+        var usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        return Optional.of(usuario);
+    }
+
+
     public void eliminarUsuario(String userName) {
         var usuarioExistente = usuarioRepository.findByUsername(userName)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
