@@ -1,6 +1,5 @@
 package com.backend.floristeria.service;
 
-import com.backend.floristeria.dto.pedido.PedidoDTO;
 import com.backend.floristeria.model.cliente.ClienteEntity;
 import com.backend.floristeria.model.destinatario.DestinatarioEntity;
 import com.backend.floristeria.model.pedido.EstadoPedido;
@@ -9,9 +8,9 @@ import com.backend.floristeria.model.repartidor.RepartidorEntity;
 import com.backend.floristeria.model.usuario.RolUsuario;
 import com.backend.floristeria.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -186,7 +185,13 @@ public class PedidoService {
         return guardado;
     }
 
-    public Page<PedidoEntity> obtenerPedidos(Pageable pageable, String userName) {
+    public Page<PedidoEntity> obtenerPedidos(Pageable pageable, Authentication authentication) {
+        boolean esDecorador = authentication.getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_DECORADOR"));
+        if(esDecorador) {
+            return pedidoRepository.findByEstadoPedido(EstadoPedido.PENDIENTE, pageable);
+        }
         return pedidoRepository.findAll(pageable);
     }
 

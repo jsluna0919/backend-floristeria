@@ -47,9 +47,8 @@ public class PedidoController{
     @GetMapping("/listar")
     public ResponseEntity<Page<PedidoDTO>> listarPedidos(Pageable pageable,
                                                             Authentication authentication) {
-        // Obtenemos el usuario que está logueado
-        String username = authentication.getName();
-        var pedidoEntities = pedidoService.obtenerPedidos(pageable, username);
+
+        var pedidoEntities = pedidoService.obtenerPedidos(pageable, authentication);
         Page<PedidoDTO> pedidoDTOS = pedidoEntities.map(PedidoMapper::toDTO);
         return ResponseEntity.ok(pedidoDTOS);
     }
